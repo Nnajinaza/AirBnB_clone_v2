@@ -2,6 +2,7 @@
 """ Module for testing file storage"""
 import unittest
 from models.base_model import BaseModel
+from models.state import State
 from models import storage
 import os
 
@@ -40,6 +41,13 @@ class test_fileStorage(unittest.TestCase):
         new = BaseModel()
         temp = storage.all()
         self.assertIsInstance(temp, dict)
+
+    def test_all2(self):
+        """ __objects is properly filtered and returned """
+        state1 = State()
+        state2 = State()
+        base = BaseModel()
+        self.assertEqual(len(storage.all(State).keys()), 2)
 
     def test_base_model_instantiation(self):
         """ File is not created on BaseModel save """
@@ -107,3 +115,11 @@ class test_fileStorage(unittest.TestCase):
         from models.engine.file_storage import FileStorage
         print(type(storage))
         self.assertEqual(type(storage), FileStorage)
+
+    def test_delete(self):
+        """ Tests FileStorage's 'delete' method """
+        new = BaseModel()
+        new2 = BaseModel()
+        self.assertEqual(len(storage.all().keys()), 2)
+        storage.delete(new)
+        self.assertEqual(len(storage.all().keys()), 1)
