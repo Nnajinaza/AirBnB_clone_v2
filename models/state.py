@@ -18,7 +18,7 @@ class State(BaseModel, Base):
         cities = relationship("City", backref="state")
 
     else:
-        @getter
+        @property
         def cities():
             """ Returns the list of city if the id are the same """
             city_list = []
