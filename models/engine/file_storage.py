@@ -65,3 +65,5 @@ class FileStorage:
                 if obj_id == obj.id:
                     del FileStorage.__objects[key]
                     break
+        else:
+            pass
