@@ -15,7 +15,7 @@ def do_deploy(archive_path):
 
         put(archive_path, "/tmp/")
         sudo("mkdir -p /data/web_static/releases/{}/".format(p2[0]))
-                                                                    
+
         data = "/data/web_static/releases"
         sudo("tar -xzf /tmp/{} -C {}/{}/".format(p1[-1], data, p2[0]))
         sudo("rm /tmp/{}".format(p1[-1]))
