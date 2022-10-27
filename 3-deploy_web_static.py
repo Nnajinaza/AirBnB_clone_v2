@@ -8,7 +8,7 @@ import re
 from datetime import datetime
 
 env.user = 'ubuntu'
-env.hosts = ["104.196.155.240", "34.74.146.120"]
+env.hosts = ["54.84.80.138", "54.144.143.183"]
 env.key_filename = "~/id_rsa"
 
 
@@ -23,6 +23,7 @@ def do_pack():
         return os.path.normpath("./versions/web_static_{}.tgz".format(opt))
     else:
         return None
+
 
 def do_deploy(archive_path):
     """distributes an archive to your web servers
@@ -41,8 +42,9 @@ def do_deploy(archive_path):
         sudo('rm -rf /data/web_static/current')
         sudo('ln -s {}/ "/data/web_static/current"'.format(main))
         return True
-    except:
+    except Exception:
         return False
+
 
 def deploy():
     """distributes an archive to your web servers"""
