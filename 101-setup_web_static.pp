@@ -1,11 +1,14 @@
-# Installs nginx and stuff like that
-exec { '/usr/bin/env apt-get -y update' : }
--> exec { '/usr/bin/env apt-get -y install nginx' : }
--> exec { '/usr/bin/env service nginx start' : }
--> exec { '/usr/bin/env mkdir -p /data/web_static/releases/test/' : }
--> exec { '/usr/bin/env mkdir -p /data/web_static/shared/' : }
--> exec { '/usr/bin/env echo "Test for puppet" > /data/web_static/releases/test/index.html' : }
--> exec { '/usr/bin/env ln -sf /data/web_static/releases/test/ /data/web_static/current' : }
--> exec { '/usr/bin/env sed -i "/^\tlocation \/ {$/ i\\\tlocation /hbnb_static {\n\t\talias /data/web_static/current/;\n\t\tautoindex off;\n}" /etc/nginx/sites-available/default' : }
--> exec { '/usr/bin/env service nginx restart' : }
--> exec { '/usr/bin/env chown -R ubuntu:ubuntu /data/' : }
+#!/usr/bin/env bash
+# setup web_static
+
+exec { 'web_static':
+command  => 'sudo apt-get update && sudo apt-get install -y nginx && sudo mkdir -p /data/ && 
+sudo mkdir -p /data/web_static/ && sudo mkdir -p /data/web_static/releases/ && 
+sudo mkdir -p /data/web_static/shared/ && sudo mkdir -p /data/web_static/releases/test/ && 
+sudo touch /data/web_static/releases/test/index.html && echo "HOLBERTON SCHOOL!" | sudo tee /data/web_static/releases/test/index.html && 
+sudo ln -sfn /data/web_static/releases/test/ /data/web_static/current && 
+sudo chown -R ubuntu:ubuntu /data/ && 
+sudo sed -i "43 a \ \n\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n" /etc/nginx/sites-enabled/default && 
+sudo service nginx restart',
+provider => shell,
+}
