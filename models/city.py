@@ -19,7 +19,7 @@ class City(BaseModel, Base):
     """
     if (storage_engine == "db"):
         __tablename__ = 'cities'
-        state_id = Column(String(128), ForeignKey('state.id'), nullable=False)
+        state_id = Column(String(128), ForeignKey(State.id))
         name = Column(String(128), nullable=False)
         places = relationship("Place", backref="cities")
     else:

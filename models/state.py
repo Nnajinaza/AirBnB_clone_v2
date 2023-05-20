@@ -18,11 +18,14 @@ class State(BaseModel, Base):
         cities = relationship("City", backref="state")
 
     else:
-        @property
-        def cities():
-            """ Returns the list of city if the id are the same """
-            city_list = []
-            for key, value in models.storage.all().items():
-                if (value.state_id == state.id):
-                    return (city_list.append(value))
-            return city_list
+        name = ""
+
+    @property
+    def cities(self):
+        """cities list
+        """
+        result = []
+        for j, i in models.storage.all(models.city.City).items():
+            if (i.state_id == self.id):
+                result.append(i)
+        return result

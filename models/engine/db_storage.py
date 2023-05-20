@@ -1,41 +1,39 @@
 #!/usr/bin/python3
-""" DBStorage """
+"""DB storage
+"""
 import models
 from models.base_model import BaseModel, Base
-from models.city import City
-from models.state import State
-from os import getenv, environ
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from models import city, state
+from os import environ, getenv
 from sqlalchemy.orm import scoped_session
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 
-"""Values retrieved by env variables"""
-DATABASE = getenv("HBNB_MYSQL_DB")
-USER = getenv("HBNB_MYSQL_USER")
-PASSWORD = getenv("HBNB_MYSQL_PWD")
-HOST = getenv("HBNB_MYSQL_HOST")
-DATABASE_CONNECTION = (f'mysql+mysqldb://{USER}:{PASSWORD}@{HOST}/{DATABASE}')
+HBNB_MYSQL_USER = getenv('HBNB_MYSQL_USER')
+HBNB_MYSQL_PWD = getenv('HBNB_MYSQL_PWD')
+HBNB_MYSQL_HOST = getenv('HBNB_MYSQL_HOST')
+HBNB_MYSQL_DB = getenv('HBNB_MYSQL_DB')
 
 
-class DBStorge:
-    """ Private class attributes """
+class DBStorage:
+    """database storage for mysql conversion
+    """
     __engine = None
     __session = None
 
     def __init__(self):
-        """Create engine"""
-        self.__engine = create_engine(DATEBASE_CONNECTION, pool_pre_ping=True)
-        """Drop all tables if env variables HBNB_ENV
-        is equal to test
-        """
+        """initializer for DBStorage"""
+        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(
+            HBNB_MYSQL_USER,
+            HBNB_MYSQL_PWD,
+            HBNB_MYSQL_HOST,
+            HBNB_MYSQL_DB), pool_pre_ping=True)
         env = getenv("HBNB_ENV")
         if (env == "test"):
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        """
-        query on the database session all objects
+        """Query the current session and list all instances of cls
         """
         result = {}
         if cls:
@@ -50,7 +48,7 @@ class DBStorge:
                     key = "{}.{}".format(cls.__name__, row.id)
                     row.to_dict()
                     result.update({key: row})
-                    return result
+        return result
 
     def rollback(self):
         """rollback changes
@@ -58,27 +56,31 @@ class DBStorge:
         self.__session.rollback()
 
     def new(self, obj):
-        """ Add the object to the current database session """
+        """add object to current session
+        """
         self.__session.add(obj)
 
     def save(self):
-        """ Commit all changes of the current database """
+        """commit current done work
+        """
         self.__session.commit()
 
     def delete(self, obj=None):
-        """ delete from the current database session obj """
-        if (obj is not None):
+        """delete obj from session
+        """
+        if (obj is None):
             self.__session.delete(obj)
 
     def reload(self):
-        """ create the current database session
-            (self.__session) from the engine
+        """reload the session
         """
         Base.metadata.create_all(self.__engine)
-        sess = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        self.__session = scoped_session(sess)
+        Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Scope = scoped_session(Session)
+        self.__session = Scope()
 
     def close(self):
-        """ closes sessio"""
+        """display our HBNB data
+        """
         self.__session.__class__.close(self.__session)
         self.reload()
