@@ -25,3 +25,4 @@ class State(BaseModel, Base):
             for key, value in models.storage.all().items():
                 if (value.state_id == state.id):
                     return (city_list.append(value))
+            return city_list

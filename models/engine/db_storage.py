@@ -18,7 +18,7 @@ HOST = getenv("HBNB_MYSQL_HOST")
 DATABASE_CONNECTION = (f'mysql+mysqldb://{USER}:{PASSWORD}@{HOST}/{DATABASE}')
 
 
-class DBStorge():
+class DBStorge:
     """ Private class attributes """
     __engine = None
     __session = None
@@ -26,7 +26,6 @@ class DBStorge():
     def __init__(self):
         """Create engine"""
         self.__engine = create_engine(DATEBASE_CONNECTION, pool_pre_ping=True)
-
         """Drop all tables if env variables HBNB_ENV
         is equal to test
         """
@@ -38,17 +37,29 @@ class DBStorge():
         """
         query on the database session all objects
         """
-        new_dict = {}
-        if (cls is None):
-            sessions = self.__session.query(cls).all()
-            for value in sessions:
-                key = __class.__name__ + '.' + value.id
-                new_dict[key] = value
-        return (new_dict)
+        result = {}
+        if cls:
+            for row in self.__session.query(cls).all():
+                key = "{}.{}".format(cls.__name__, row.id)
+                row.to_dict()
+                result.update({key: row})
+        else:
+            for table in models.dummy_tables:
+                cls = models.dummy_tables[table]
+                for row in self.__session.query(cls).all():
+                    key = "{}.{}".format(cls.__name__, row.id)
+                    row.to_dict()
+                    result.update({key: row})
+                    return result
+
+    def rollback(self):
+        """rollback changes
+        """
+        self.__session.rollback()
 
     def new(self, obj):
         """ Add the object to the current database session """
-        self.__session.query.add(obj)
+        self.__session.add(obj)
 
     def save(self):
         """ Commit all changes of the current database """
@@ -63,6 +74,11 @@ class DBStorge():
         """ create the current database session
             (self.__session) from the engine
         """
-        Base.metadata.create_all(engine)
+        Base.metadata.create_all(self.__engine)
         sess = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        self.session = scoped_session(sess)
+        self.__session = scoped_session(sess)
+
+    def close(self):
+        """ closes sessio"""
+        self.__session.__class__.close(self.__session)
+        self.reload()
